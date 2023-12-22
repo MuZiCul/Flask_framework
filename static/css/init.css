@@ -1,0 +1,67 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+    /*Linear gradient... */
+    /*background-color: #d3d3d3;*/
+}
+
+header {
+
+    position: fixed;
+    width: 100%;
+    z-index: 999
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+main {
+    padding-top: 80px;
+}
+
+.username {
+    width: auto
+}
+
+canvas {
+    display: block;
+    vertical-align: bottom;
+}
+
+.particles-js-canvas-el {
+    width: 100%;
+    height: 100%;
+}
+
+.particles-js {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+.progress {
+    width: 100%;
+    height: 2px;
+}
+
+.progress_div {
+    transition: width .5s;
+}
+
+.progress div {
+    width: 0;
+    height: 100%;
+    background: black;
+}
+
+

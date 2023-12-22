@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/login.css') }}">
+</head>
+<body>
+<style>
+    .captcha {
+        background-image: url("{{ CaptchaPic }}");
+        background-size: auto 100%;
+        background-position: right;
+        background-repeat: no-repeat;
+    }
+</style>
+<div class="container right-panel-active">
+    <!-- 登录 -->
+    <div class="container__form container--signup">
+        <form action="/login" class="form" method="post">
+            {% if error %}
+                <h2 class="form__title">登录</h2><br>
+                <h4 class="form__title" style="color: orangered">{{ error }}</h4>
+            {% else %}
+                <h2 class="form__title">登录</h2><br>
+                <h4 class="form__title" style="visibility: hidden">请输入账号密码</h4>
+            {% endif %}
+
+            <input type="text" placeholder="邮箱" class="input" name="account" value="{{ account }}"
+                   autocomplete="new-password" required="required"/>
+            <input type="password" placeholder="密码" class="input" name="password"
+                   autocomplete="new-password" required="required"/>
+            <input type="text" placeholder="验证码" name="captcha" class="input captcha"
+                   autocomplete="new-password" required="required"/>
+
+            <button class="btn" type="submit">登录</button>
+
+        </form>
+    </div>
+
+    <!-- 注册 -->
+    <div class="container__form container--signin">
+        <form action="/register" method="post" class="form" id="form2">
+            {% if error %}
+                <h2 class="form__title">注册</h2><br>
+                <h4 class="form__title" style="color: orangered">{{ error }}</h4>
+            {% else %}
+                <h2 class="form__title">注册</h2><br>
+                <h4 class="form__title" style="visibility: hidden">请输入账号密码</h4>
+            {% endif %}
+            <input type="email" placeholder="邮箱" class="input" name="email" autocomplete="new-password"
+                   required="required"/>
+            <input type="password" placeholder="密码" class="input" name="password"
+                   autocomplete="new-password" required="required"/>
+            <input type="text" placeholder="验证码" name="captcha" class="input captcha"
+                   autocomplete="new-password" required="required"/>
+            <button class="btn" type="submit">注册</button>
+        </form>
+    </div>
+
+    <!-- Overlay -->
+    <div class="container__overlay">
+        <div class="overlay">
+            <div class="overlay__panel overlay--left">
+                <button class="btn" id="signIn">没有账号?注册一个!</button>
+                {% if no_pwd %}
+                <button class="btn" style="margin-top: 65px;width: 260.48px;" onclick="window.location.href = '/no_pwd_login';">无密码登录</button>
+                {% endif %}
+            </div>
+            <div class="overlay__panel overlay--right">
+                <button class="btn" id="signUp">已有账号?点击登录!</button>
+                {% if no_pwd %}
+                <button class="btn" style="margin-top: 65px;width: 260.48px;" onclick="window.location.href = '/no_pwd_login';">无密码登录</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<input id="coding" value="{{ coding }}" style="display: none">
+<script>
+    if (window.self !== window.top) {
+        parent.location.reload()
+        //1. 如果返回false –> 说明页面被嵌套在iframe中了
+        //2. 如果返回true –> 说明页面并没有被嵌套在iframe中
+    }
+    const captcha = document.querySelectorAll('.captcha')
+    for (let i = 0; i < captcha.length; i++) {
+        captcha[i].addEventListener('click', (event) => {
+            const inputRect = captcha[i].getBoundingClientRect();
+            const clickX = event.clientX - inputRect.left;
+            if (clickX > inputRect.width * 0.8) {
+                click_captcha();
+
+            }
+        });
+        captcha[i].addEventListener('mousemove', (event) => {
+            const inputRect = captcha[i].getBoundingClientRect();
+            const mouseX = event.clientX - inputRect.left;
+            if (mouseX > inputRect.width * 0.8) {
+                // 鼠标在背景图片区域内
+                captcha[i].style.cursor = 'pointer';
+            } else {
+                // 鼠标不在背景图片区域内
+                captcha[i].style.cursor = 'text';
+            }
+        });
+    }
+
+
+    const signInBtn = document.getElementById("signIn");
+    const signUpBtn = document.getElementById("signUp");
+    const fistForm = document.getElementById("form1");
+    const secondForm = document.getElementById("form2");
+    const container = document.querySelector(".container");
+
+    signInBtn.addEventListener("click", () => {
+        container.classList.remove("right-panel-active");
+        setTimeout(function () {
+            click_captcha();
+        }, 300);//300代表延迟毫秒值
+
+    });
+
+    signUpBtn.addEventListener("click", () => {
+        container.classList.add("right-panel-active");
+        setTimeout(function () {
+            click_captcha();
+        }, 300);//300代表延迟毫秒值
+    });
+
+    function click_captcha() {
+        $.ajax({
+            url: '/getCaptchaImg',
+            method: 'post',
+            data: {'coding': $('#coding').val()},
+            success: function (data) {
+                if (data.code === 200) {
+                    captcha[0].style.backgroundImage = 'url(' + data.src + ')';
+                    captcha[1].style.backgroundImage = 'url(' + data.src + ')';
+                    $('#coding').val(data.coding)
+                }
+            },
+            error: function () {
+                alert('获取验证码失败！')
+            }
+        })
+
+    }
+</script>
+
+</body>
+</html>

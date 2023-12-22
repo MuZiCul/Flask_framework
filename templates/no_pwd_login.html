@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/login.css') }}">
+</head>
+<body>
+<style>
+    .cont {
+        width: 270px;
+        margin: 50px auto;
+        text-align: center;
+    }
+
+    {% if type %}
+        .cont > div { /*设置小圆圈的样式*/
+            width: 15px;
+            height: 15px;
+            float: left;
+            margin: 0px 10px;
+            background: orangered;
+            border-radius: 100%;
+            animation: anim 1s infinite normal ease;
+        }
+    {% else %}
+        .cont > div { /*设置小圆圈的样式*/
+            width: 15px;
+            height: 15px;
+            float: left;
+            margin: 0px 10px;
+            background: #fff;
+            border-radius: 100%;
+            animation: anim 1s infinite normal ease;
+        }
+    {% endif %}
+
+    .cont > :nth-child(2n) { /*设置奇数个小圆圈的动画延迟*/
+        animation-delay: 0.5s;
+    }
+
+    @keyframes anim { /*定义动画*/
+        0% {
+            transform: scale(0.4);
+        }
+        25% {
+            transform: translateY(30px);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        75% {
+            transform: translateY(-30px);
+        }
+        100% {
+            transform: translateY(0);
+            transform: scale(0.75);
+        }
+    }
+</style>
+<div class="container right-panel-active">
+    <!-- 登录 -->
+    <div class="container__form container--signup">
+        <div class="form">
+            {% if error %}
+                <h2 class="form__title">登录</h2><br>
+                <h4 class="form__title" name="error" style="color: orangered">{{ error }}</h4>
+            {% else %}
+                <h2 class="form__title">登录</h2><br>
+                <h4 class="form__title" name="error" style="visibility: hidden">请输入邮箱</h4>
+            {% endif %}
+
+            <input type="email" placeholder="邮箱账号" class="input" name="email"
+                   autocomplete="new-password" required="required"/>
+            <button class="btn" onclick="no_pwd_login()">无密码登录</button>
+        </div>
+    </div>
+
+    <!-- 注册 -->
+    <div class="container__form container--signin">
+        <form action="/check_captcha" method="post" class="form" id="form2">
+            {% if error %}
+                <h2 class="form__title">验证码</h2><br>
+                <h4 class="form__title" style="color: orangered">{{ error }}</h4>
+            {% else %}
+                <h2 class="form__title">验证码</h2><br>
+                <h4 class="form__title" style="visibility: hidden">请输入验证码</h4>
+            {% endif %}
+            <input type="number" placeholder="邮箱验证码" class="input" name="captcha" autocomplete="new-password"
+                   required="required"/>
+            <button class="btn" type="submit">无密码登录</button>
+        </form>
+    </div>
+
+    <!-- Overlay -->
+    <div class="container__overlay">
+        <div class="overlay">
+            <div class="overlay__panel overlay--left">
+                <div class="cont">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+            <div class="overlay__panel overlay--right">
+                <div class="cont">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input id="coding" value="{{ coding }}" style="display: none">
+<script>
+    if (window.self !== window.top) {
+        parent.location.reload()
+        //1. 如果返回false –> 说明页面被嵌套在iframe中了
+        //2. 如果返回true –> 说明页面并没有被嵌套在iframe中
+    }
+    const container = document.querySelector(".container");
+    const type = '{{ type }}'
+    if (type === '2') {
+        container.classList.remove("right-panel-active");
+    }
+
+    function no_pwd_login() {
+        $.ajax({
+            url: '/email_login',
+            method: 'post',
+            data: {'email': $('input[name="email"]').val()},
+            success: function (data) {
+                if (data.code === 200) {
+                    container.classList.remove("right-panel-active");
+                }else {
+                    $("[name='error']").text(data.msg)
+                    $("[name='error']").css("visibility", "visible")
+                    $("[name='error']").css("color", "orangered")
+                }
+            },
+            error: function () {
+                alert('？？？？？？？')
+            }
+        })
+    }
+</script>
+
+</body>
+</html>

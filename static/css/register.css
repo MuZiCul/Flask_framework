@@ -1,0 +1,24 @@
+
+.lead {
+    font-size: 40px;
+    text-align: center;
+}
+
+.inner_box {
+    background-color: white;
+    padding: 40px;
+    border-radius: 20px;
+}
+
+.outer_box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.background_img {
+    position: fixed;
+    width: 2560px;
+    height: 1440px;
+    z-index: -1
+}
