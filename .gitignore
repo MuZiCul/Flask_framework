@@ -1,7 +1,1 @@
-### Example user template template
-### Example user template
-
-# IntelliJ project files
-.idea
-*.iml
-private_config.py
+/config/private_config.py
