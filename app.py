@@ -16,6 +16,7 @@ from utils.useronline import PollingUserOnline
 app = Flask(__name__)
 app.config.from_object(private_config)
 # app.config.from_object(config)
+app.config['SCHEDULER_TIMEZONE'] = 'Asia/Shanghai'
 
 db.init_app(app)
 mail.init_app(app)
@@ -23,10 +24,13 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 redis_client.init_app(app)
 migrate = Migrate(app, db)
+scheduler = APScheduler()
+scheduler.init_app(app)
+
 app.register_blueprint(user_bp)
 app.register_blueprint(general_bp)
 app.config['UPLOAD_PATH'] = os.path.join(os.path.dirname(__file__), 'file')
-
+scheduler.start()
 
 @app.before_request
 def before_request():
@@ -66,6 +70,16 @@ def clean():
 @login_required
 def index():
     return render_template('index.html')
+
+
+# 定时清理验证码图片
+@scheduler.task('interval', id='delCaptcha', minutes=10)
+def check_net():
+    try:
+        with scheduler.app.app_context():
+            delCaptcha()
+    finally:
+        pass
 
 
 @app.route('/file/<name>', methods=['GET', 'POST'])
