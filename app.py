@@ -32,6 +32,12 @@ app.register_blueprint(general_bp)
 app.config['UPLOAD_PATH'] = os.path.join(os.path.dirname(__file__), 'file')
 scheduler.start()
 
+
+@app.before_first_request
+def before_first_request():
+    delCaptcha()
+
+
 @app.before_request
 def before_request():
     user_id = session.get('userid')
