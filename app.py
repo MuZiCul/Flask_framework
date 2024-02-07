@@ -4,7 +4,7 @@ from PIL import Image
 from flask import Flask, session, g, render_template, send_file
 from flask_migrate import Migrate
 from flask_apscheduler import APScheduler
-from config import config, private_config
+from config import config
 from blueprints import user_bp, general_bp
 from config.decorators import login_required
 from config.exts import mail, redis_client
@@ -14,7 +14,7 @@ from utils.captchas import delCaptcha
 from utils.useronline import PollingUserOnline
 
 app = Flask(__name__)
-app.config.from_object(private_config)
+app.config.from_object(config)
 # app.config.from_object(config)
 app.config['SCHEDULER_TIMEZONE'] = 'Asia/Shanghai'
 

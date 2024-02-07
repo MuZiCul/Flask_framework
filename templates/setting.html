@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>OA</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='layui/css/layui.css') }}" media="all">
+    <script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
+</head>
+<body>
+<form class="layui-form" action="form.html" lay-filter="setting-val-filter">
+    <fieldset class="layui-elem-field">
+        <legend>基本设置</legend>
+        <div class="layui-field-box">
+              <div class="layui-form-item">
+    <label class="layui-form-label">无密码登录</label>
+    <div class="layui-input-block">
+      <input type="radio" name="no_pwd" value="1" title="ON" checked>
+      <input type="radio" name="no_pwd" value="0" title="OFF">
+    </div>
+  </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn" lay-submit lay-filter="setting-val">修改</button>
+                    <button type="button" onclick="window.history.back ();" class="layui-btn layui-btn-primary">取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</form>
+
+
+<script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
+<script>
+    layui.use(['upload', 'element', 'layer'], function () {
+        var $ = layui.jquery
+            , layer = layui.layer;
+        var form = layui.form;
+        form.val('setting-val-filter', { "no_pwd": '{{ data.no_pwd }}'
+        });
+        // 提交事件
+        form.on('submit(setting-val)', function (data) {
+            var field = data.field; // 获取表单字段值
+            // 显示填写结果，仅作演示用
+            $.ajax({
+                url: '/change_config_data', method: 'post', data: field, success: function (data) {
+                    if (200 === data.code || '200' === data.code) {
+                        layer.msg(data.msg)
+                    }
+                }
+            })
+            return false; // 阻止默认 form 跳转
+        });
+    })
+</script>
+</body>
+</html>

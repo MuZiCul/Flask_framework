@@ -11,7 +11,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/layui/2.9.2/css/layui.css" integrity="sha512-V8POzDh/+/NrceHV1dsdK9v6VWgQAtPaxYvQWGID2+PRoWJrjFiqlb26gE2PzdE8GIFoBvOOBtMH/SiAvj8uWQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='layui/css/layui.css') }}" media="all">
+    <script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
     <script type="text/javascript">
         function open_page(title) {
             $('iframe').attr('src', title)
@@ -72,6 +73,9 @@
                     <dd><a href="javascript:;" onclick="open_page('profile_data')"><i
                             class="layui-icon layui-icon-cellphone"> Your Profile</i></a>
                     </dd>
+                                        <dd><a href="javascript:;" onclick="open_page('setting')"><i
+                            class="layui-icon layui-icon-cellphone"> Setting</i></a>
+                    </dd>
                     <dd><a href="javascript:;" onclick="window.location.href='/logoff'"><i
                             class="layui-icon layui-icon-logout"> Sign
                         out</i></a></dd>
@@ -113,7 +117,6 @@
          Web © 2023
     </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/layui/2.9.2/layui.js" integrity="sha512-Hi0LgO2tGKomsX68HriNwIaBWU0oXjEBCbAAhkAStXXZ9dzANLbL3RUJLn42lds2WlDM0VOTmskm6grx+nuFiA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript">
     const sUserAgent = navigator.userAgent;
     if (sUserAgent.indexOf('Android') > -1 || sUserAgent.indexOf('iPhone') > -1
