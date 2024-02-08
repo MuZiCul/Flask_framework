@@ -1,9 +1,11 @@
 import datetime
+import os
 import random
 import re
 import string
+import uuid
 
-from flask import Blueprint, render_template, redirect, g, url_for, request, flash, session, jsonify
+from flask import Blueprint, render_template, redirect, g, url_for, request, flash, session, jsonify, current_app
 from flask_mail import Message
 
 from config.decorators import login_required
@@ -245,3 +247,37 @@ def getCaptchaTime(email):
         else:
             return False
 
+
+@bp.route('/upload_icon', methods=['GET', 'POST'])
+@login_required
+def upload_file():
+    file = request.files['file']
+    file_name = file.filename
+    file_code = str(uuid.uuid1()).replace('-', '')
+    file_type = file_name.split('.')[-1]
+    file_size = round(get_size(file) / (1024 * 1024), 2)
+    if file_size > 10:
+        return jsonify({'code': -1, 'msg': '头像大小不能大于10MB'})
+
+    file.save(os.path.join(current_app.config['UPLOAD_PATH'], file_code + '.' + file_type))
+    user = UserModel.query.filter_by(id=g.user.id).first()
+    user.icon = file_code + '.' + file_type
+    db.session.commit()
+    return jsonify({'code': 200, 'msg': 'SUCCESS'})
+
+
+def get_size(fobj):
+    if fobj.content_length:
+        return fobj.content_length
+
+    try:
+        pos = fobj.tell()
+        fobj.seek(0, 2)  # seek to end
+        size = fobj.tell()
+        fobj.seek(pos)  # back to original position
+        return size
+    except (AttributeError, IOError):
+        pass
+
+    # in-memory file object that doesn't support seeking or tell
+    return 0  # assume small enough

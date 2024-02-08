@@ -64,8 +64,7 @@
         <ul class="layui-nav layui-layout-right" style="right: 50px">
             <li class="layui-nav-item layui-show-md-inline-block">
                 <a href="javascript:;">
-                    <img src="file/{{ user.icon }}"
-                         tppabs="https://s2.loli.net/2022/06/13/oIFlR9tV1QiOfZm.jpg"
+                    <img src="file/{{ user.icon }}" onerror="this.src='file/default_icon.png'"
                          class="layui-nav-img">
                     {% if user %}{{ user.username }}{% endif %}
                 </a>
