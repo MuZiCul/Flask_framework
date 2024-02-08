@@ -51,7 +51,7 @@ def before_request():
                 g.user = ''
 
         except Exception as e:
-            print(e)
+            print('before_request',e)
             g.user = ''
 
 

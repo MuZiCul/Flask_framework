@@ -34,5 +34,5 @@ def change_config_data():
         configs.no_pwd = 1
     else:
         configs.no_pwd = 0
-
+    db.session.commit()
     return jsonify({'code': 200, 'msg': 'success'})

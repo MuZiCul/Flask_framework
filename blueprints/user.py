@@ -13,6 +13,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from utils.Aescrypt import Aescrypt
 from utils.captchas import getCaptchaPic
+from utils.valid import is_valid_email
 
 bp = Blueprint('user', __name__, url_prefix='/')
 
@@ -58,6 +59,7 @@ def register():
             print(g.user.id)
             return redirect(url_for('index'))
         except Exception as e:
+            print('register',e)
             session.clear()
             CaptchaPic, coding = getCaptchaPic('')
             return render_template('login.html', CaptchaPic=CaptchaPic, coding=coding)
@@ -68,23 +70,24 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         captcha = request.form.get('captcha')
-        if not redis_client.keys(captcha.lower()):
+        if not is_valid_email(email):
             error = '验证码有误！'
-            CaptchaPic, coding = getCaptchaPic('')
-            return render_template('login.html', error=error, CaptchaPic=CaptchaPic, coding=coding, account=email)
-        if UserModel.query.filter_by(email=email).first():
+        elif not redis_client.keys(captcha.lower()):
+            error = '验证码有误！'
+        elif UserModel.query.filter_by(email=email).first():
             error = '该邮箱已注册！'
-            CaptchaPic, coding = getCaptchaPic('')
-            return render_template('login.html', error=error, CaptchaPic=CaptchaPic, coding=coding, account=email)
-        user = UserModel(email=email, username=email, password=generate_password_hash(password))
-        db.session.add(user)
-        db.session.commit()
-        user_username = UserModel.query.filter_by(email=email).first()
-        session['userid'] = user_username.id
-        return redirect(url_for('index'))
+        else:
+            user = UserModel(email=email, username=email, password=generate_password_hash(password))
+            db.session.add(user)
+            db.session.commit()
+            user_username = UserModel.query.filter_by(email=email).first()
+            session['userid'] = user_username.id
+            return redirect(url_for('index'))
+        CaptchaPic, coding = getCaptchaPic('')
+        return render_template('login.html', error=error, CaptchaPic=CaptchaPic, coding=coding, account=email)
 
 
-# @login_required
+@login_required
 @bp.route('/user_info', methods=['GET', 'POST'])
 def user_info():
     page = int(request.args.get('page', 1))
@@ -104,7 +107,7 @@ def user_info():
     return dic
 
 
-# @login_required
+@login_required
 @bp.route('/user_info_html', methods=['GET', 'POST'])
 def user_info_html():
     return render_template('user_info_html.html')
@@ -118,7 +121,7 @@ def logoff():
         redis_client.delete(f'online_userid_{user.id}', f'user_id_{user.id}')
         db.session.commit()
     except Exception as e:
-        print(e)
+        print('logoff',e)
     finally:
         session.clear()
         flash("账号已退出！")
@@ -133,6 +136,39 @@ def profile_data():
     data = {'username': user.username, 'email': user.email, 'state': '在职' if user.state else '离职',
             'id': id}
     return render_template('profile.html', data=data)
+
+
+@bp.route('/change_profile_data', methods=['GET', 'POST'])
+@login_required
+def change_profile_data():
+    username = request.form.get('username')
+    email = request.form.get('email')
+    if not is_valid_email(email):
+        return jsonify({'code': 400, 'msg': '邮箱格式不正确'})
+    user = UserModel.query.filter_by(id=g.user.id).first()
+    user.username = username
+    user.email = email
+    db.session.commit()
+    return jsonify({'code': 200, 'msg': 'success'})
+
+
+@bp.route('/change_pwd_data', methods=['GET', 'POST'])
+@login_required
+def change_pwd_data():
+    opwd = request.form.get('opwd')
+    npwd = request.form.get('npwd')
+    rpwd = request.form.get('rpwd')
+    user = UserModel.query.filter_by(id=g.user.id).first()
+    if not check_password_hash(user.password, opwd):
+        return jsonify({'code': 400, 'msg': '旧密码错误'})
+    if npwd != rpwd:
+        return jsonify({'code': 400, 'msg': '两次密码不一致'})
+    else:
+        user.password = generate_password_hash(npwd)
+        db.session.commit()
+        return jsonify({'code': 200, 'msg': 'success'})
+
+
 
 
 @bp.route('/email_login', methods=['GET', 'POST'])
@@ -209,15 +245,3 @@ def getCaptchaTime(email):
         else:
             return False
 
-
-def is_valid_email(email):
-    # 邮箱的正则表达式模式
-    pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
-
-    # 使用re.match函数进行匹配
-    match = re.match(pattern, email)
-
-    if match:
-        return True
-    else:
-        return False

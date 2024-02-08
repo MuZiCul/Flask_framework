@@ -10,7 +10,7 @@ def login_required(fun):
                 print(g.user.id)
                 return fun(*args, **kwargs)
             except Exception as e:
-                print('！！！！！！！！！出现异常：', str(e))
+                print('login_required：', str(e))
                 flash(str(e))
                 session.clear()
                 return render_template('login.html')
