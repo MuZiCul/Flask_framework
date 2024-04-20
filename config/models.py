@@ -28,6 +28,7 @@ class EmailCaptchaModel(db.Model):
     captcha = db.Column(db.String(200), nullable=False)
     type = db.Column(db.Integer, default='1')
     create_time = db.Column(db.DateTime, default=datetime.now)
+    update_time = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
 
 
