@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>OA</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='layui/css/layui.css') }}" media="all">
+</head>
+<body>
+<form class="layui-form" lay-filter="demo-val-filter">
+    <fieldset class="layui-elem-field">
+        <legend>基础设置</legend>
+        <div class="layui-field-box">
+            <div class="layui-form-item">
+                <label class="layui-form-label">无密码登录</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="NoPwd" lay-skin="switch" lay-filter="switchNoPwd"
+                           lay-text="ON|OFF">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">登录验证码</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="Captcha" lay-skin="switch" lay-filter="switchCaptcha"
+                           lay-text="ON|OFF">
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</form>
+
+
+<script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
+<script>
+    layui.use(['upload', 'element', 'layer'], function () {
+        var $ = layui.jquery
+            , layer = layui.layer;
+        var form = layui.form;
+        form.val('demo-val-filter', {
+            "Captcha": {{ data.Captcha }}
+            , "NoPwd": {{ data.NoPwd }}
+            // true or false
+        });
+        //指定开关事件
+        form.on('switch(switchCaptcha)', function (data) {
+            $.ajax({
+                url: '/Change_CAPTCHA',
+                method: 'post',
+                data: {'CAPTCHA': (this.checked ? 'true' : 'false')},
+                success: function (data) {
+                    if (200 === data.code || '200' === data.code) {
+                        layer.msg(data.msg, {
+                            offset: '6px'
+                        })
+                    }
+                }
+            })
+        });
+        form.on('switch(switchNoPwd)', function (data) {
+            {#layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是ON|OFF', data.othis)#}
+            $.ajax({
+                url: '/Change_NO_PWD',
+                method: 'post',
+                data: {'NO_PWD': (this.checked ? 'true' : 'false')},
+                success: function (data) {
+                    if (200 === data.code || '200' === data.code) {
+                        layer.msg(data.msg, {
+                            offset: '6px'
+                        })
+                    }
+                }
+            })
+        });
+    })
+</script>
+</body>
+</html>
