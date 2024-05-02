@@ -3,12 +3,12 @@ import random
 import re
 import string
 
-from flask import Blueprint, render_template, redirect, g, url_for, request, flash, session, jsonify
+from flask import Blueprint, render_template, redirect, g, url_for, request, flash, session, jsonify, current_app
 from flask_mail import Message
 
 from config.decorators import login_required
 from config.exts import db, redis_client, mail
-from config.models import UserModel, ConfigModel, EmailCaptchaModel
+from config.models import UserModel, EmailCaptchaModel
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from utils.Aescrypt import Aescrypt
@@ -19,31 +19,35 @@ bp = Blueprint('user', __name__, url_prefix='/')
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
-    CaptchaPic, coding = getCaptchaPic('')
-    configs = ConfigModel.query.filter_by(id=0).first()
-    no_pwd = configs.no_pwd
+    no_pwd = current_app.config.get('NO_PWD')
+    captcha = current_app.config.get('CAPTCHA')
+    if captcha:
+        CaptchaPic, coding = getCaptchaPic('')
+    else:
+        CaptchaPic, coding = 0, 0
     if request.method == 'POST':
         account = request.form.get('account')
         password = request.form.get('password')
-        captcha = request.form.get('captcha')
-        if not redis_client.keys(captcha.lower()):
-            error = '验证码有误'
-            CaptchaPic, coding = getCaptchaPic('')
-            return render_template('login.html', error=error, CaptchaPic=CaptchaPic, coding=coding, account=account,
-                                   no_pwd=no_pwd)
+        if captcha:
+            captcha = request.form.get('captcha')
+            if not redis_client.keys(captcha.lower()):
+                error = '验证码有误'
+                CaptchaPic, coding = getCaptchaPic('')
+                return render_template('login.html', error=error, CaptchaPic=CaptchaPic, coding=coding, account=account,
+                                       no_pwd=no_pwd, captcha=captcha)
         user_username = UserModel.query.filter_by(email=account).first()
         if not user_username:
             error = '账户不存在'
             return render_template('login.html', error=error, CaptchaPic=CaptchaPic, coding=coding, account=account,
-                                   no_pwd=no_pwd)
+                                   no_pwd=no_pwd, captcha=captcha)
         if user_username and check_password_hash(user_username.password, password):
             session['userid'] = user_username.id
             return redirect(url_for('index'))
         else:
             error = '账户或密码有误'
             return render_template('login.html', error=error, CaptchaPic=CaptchaPic, coding=coding, account=account,
-                                   no_pwd=no_pwd)
-    return render_template('login.html', CaptchaPic=CaptchaPic, coding=coding, no_pwd=no_pwd)
+                                   no_pwd=no_pwd, captcha=captcha)
+    return render_template('login.html', CaptchaPic=CaptchaPic, coding=coding, no_pwd=no_pwd, captcha=captcha)
 
 
 @bp.route('/no_pwd_login', methods=['GET', 'POST'])
@@ -53,29 +57,40 @@ def no_pwd_login():
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
+    no_pwd = current_app.config.get('NO_PWD')
+    captcha = current_app.config.get('CAPTCHA')
+    if captcha:
+        CaptchaPic, coding = getCaptchaPic('')
+    else:
+        CaptchaPic, coding = 0, 0
+
     if hasattr(g, 'user'):
         try:
             print(g.user.id)
             return redirect(url_for('index'))
         except Exception as e:
             session.clear()
-            CaptchaPic, coding = getCaptchaPic('')
-            return render_template('login.html', CaptchaPic=CaptchaPic, coding=coding)
+            return render_template('login.html', CaptchaPic=CaptchaPic, coding=coding, no_pwd=no_pwd, captcha=captcha,
+                                   register=1)
+
     if request.method == 'GET':
-        CaptchaPic, coding = getCaptchaPic('')
-        return render_template('login.html', CaptchaPic=CaptchaPic, coding=coding)
+        return render_template('login.html', CaptchaPic=CaptchaPic, coding=coding, no_pwd=no_pwd, captcha=captcha,
+                               register=1)
     else:
         email = request.form.get('email')
         password = request.form.get('password')
-        captcha = request.form.get('captcha')
-        if not redis_client.keys(captcha.lower()):
-            error = '验证码有误！'
-            CaptchaPic, coding = getCaptchaPic('')
-            return render_template('login.html', error=error, CaptchaPic=CaptchaPic, coding=coding, account=email)
+        if captcha:
+            captcha = request.form.get('captcha')
+            if not redis_client.keys(captcha.lower()):
+                error = '验证码有误！'
+                CaptchaPic, coding = getCaptchaPic('')
+                return render_template('login.html', error=error, CaptchaPic=CaptchaPic, coding=coding, account=email,
+                                       no_pwd=no_pwd, captcha=captcha, register=1)
         if UserModel.query.filter_by(email=email).first():
             error = '该邮箱已注册！'
             CaptchaPic, coding = getCaptchaPic('')
-            return render_template('login.html', error=error, CaptchaPic=CaptchaPic, coding=coding, account=email)
+            return render_template('login.html', error=error, CaptchaPic=CaptchaPic, coding=coding, account=email,
+                                   no_pwd=no_pwd, captcha=captcha, register=1)
         user = UserModel(email=email, username=email, password=generate_password_hash(password))
         db.session.add(user)
         db.session.commit()

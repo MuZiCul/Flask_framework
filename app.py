@@ -36,6 +36,8 @@ scheduler.start()
 @app.before_first_request
 def before_first_request():
     delCaptcha()
+    app.config['NO_PWD'] = SettingModel.query.filter_by(id=0).first().no_pwd
+    app.config['CAPTCHA'] = SettingModel.query.filter_by(id=0).first().captcha
 
 
 @app.before_request

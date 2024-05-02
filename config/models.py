@@ -15,10 +15,11 @@ class UserModel(db.Model):
     create_date = db.Column(db.DateTime, default=datetime.now)
 
 
-class ConfigModel(db.Model):
-    __tablename__ = "config"
+class SettingModel(db.Model):
+    __tablename__ = "setting"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     no_pwd = db.Column(db.Integer, default=0)
+    captcha = db.Column(db.Integer, default=0)
 
 
 class EmailCaptchaModel(db.Model):
