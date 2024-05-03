@@ -99,6 +99,17 @@ def register():
         return redirect(url_for('index'))
 
 
+def check_user_type(type):
+    if type == -1:
+        return 'DEBUG账户'
+    elif type == 2:
+        return '管理员'
+    elif type == 3:
+        return '普通用户'
+    else:
+        return '未知'
+
+
 # @login_required
 @bp.route('/user_info', methods=['GET', 'POST'])
 def user_info():
@@ -110,7 +121,7 @@ def user_info():
         dit = {'id': i.id,
                'username': i.username,
                'email': i.email,
-               'type': i.type,
+               'type': check_user_type(i.type),
                'state': i.state,
                'create_date': str(i.create_date)[:19],
                }
@@ -145,8 +156,10 @@ def logoff():
 def profile_data():
     id = g.user.id
     user = UserModel.query.filter_by(id=id).first()
-    data = {'username': user.username, 'email': user.email, 'state': '在职' if user.state else '离职',
+    data = {'username': user.username,
+               'type': check_user_type(user.type),'email': user.email, 'state': '在职' if user.state else '离职',
             'id': id}
+
     return render_template('profile.html', data=data)
 
 

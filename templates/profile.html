@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='layui/css/layui.css') }}" media="all">
+  <link href="//unpkg.com/layui@2.9.8/dist/css/layui.css" rel="stylesheet">
 </head>
 <body>
 <form class="layui-form" action="form.html" lay-filter="demo-val-filter">
@@ -19,17 +19,30 @@
         <legend>基础资料</legend>
         <div class="layui-field-box">
             <div class="layui-form-item">
-                <label class="layui-form-label">Number</label>
-                <div class="layui-input-block">
-                    <input type="text" name="id" lay-verify="title" autocomplete="off" placeholder="请输入" readonly
-                           class="layui-input">
+                <div class="layui-inline">
+                    <label class="layui-form-label">Number</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="id" lay-verify="title" autocomplete="off" readonly
+                               class="layui-input">
+                    </div>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">状态</label>
-                <div class="layui-input-block">
-                    <input type="text" name="state" lay-verify="title" autocomplete="off" placeholder="请输入" readonly
-                           class="layui-input">
+                <div class="layui-inline">
+                    <label class="layui-form-label">状态</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="state" lay-verify="title" autocomplete="off" readonly
+                               class="layui-input">
+                    </div>
+                </div>
+            </div>
+                        <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">身份</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="user-type" lay-verify="title" autocomplete="off" readonly
+                               class="layui-input">
+                    </div>
                 </div>
             </div>
         </div>
@@ -37,18 +50,25 @@
     <fieldset class="layui-elem-field">
         <legend>个人资料</legend>
         <div class="layui-field-box">
+
             <div class="layui-form-item">
-                <label class="layui-form-label">用户名</label>
-                <div class="layui-input-block">
-                    <input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入"
-                           class="layui-input">
+                <div class="layui-inline">
+                    <label class="layui-form-label">用户名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入"
+                               class="layui-input">
+                    </div>
                 </div>
             </div>
+
             <div class="layui-form-item">
-                <label class="layui-form-label">email</label>
-                <div class="layui-input-block">
-                    <input type="text" name="email" lay-verify="title" autocomplete="off" placeholder="请输入"
-                           class="layui-input">
+                <div class="layui-inline">
+                    <label class="layui-form-label">Email</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="email" lay-verify="title" autocomplete="off" placeholder="请输入"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">Email为登录账号，修改后请牢记，否则可能导致无法登录。</div>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -67,23 +87,34 @@
         <div class="layui-field-box">
             <div class="layui-form-item">
                 <label class="layui-form-label">旧密码</label>
-                <div class="layui-input-block">
+                <div class="layui-input-inline">
                     <input type="password" name="opwd" lay-verify="title" autocomplete="off" placeholder="请输入"
-                           class="layui-input">
+                           class="layui-input" lay-affix="eye">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label">新密码</label>
-                <div class="layui-input-block">
+                <div class="layui-input-inline">
                     <input type="password" name="npwd" lay-verify="title" autocomplete="off" placeholder="请输入"
-                           class="layui-input">
+                           class="layui-input" lay-affix="eye">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">再次输入</label>
-                <div class="layui-input-block">
+                <label class="layui-form-label">确认密码</label>
+                <div class="layui-input-inline">
                     <input type="password" name="rpwd" lay-verify="title" autocomplete="off" placeholder="请输入"
-                           class="layui-input">
+                           class="layui-input" lay-affix="eye">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">验证码</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="vercode" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+                <div class="layui-form-mid" style="padding: 0!important;">
+                    <button type="button" id="verifyBtn" class="layui-btn layui-btn-primary" lay-on="get-vercode">
+                        获取验证码
+                    </button>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -112,18 +143,19 @@
 </fieldset>
 
 
-<script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
+<script src="//unpkg.com/layui@2.9.8/dist/layui.js"></script>
 <script>
-    layui.use(['upload', 'element', 'layer'], function () {
+    layui.use(['upload',  'util', 'element', 'layer'], function () {
         var $ = layui.jquery
             , upload = layui.upload
-            , element = layui.element
+            , util = layui.util
             , layer = layui.layer;
         var form = layui.form;
         form.val('demo-val-filter', {
             "id": ('0000' + '{{ data.id }}').slice(-4)
             , "username": '{{ data.username }}'
             , "email": '{{ data.email }}'
+            , "user-type": '{{ data.type }}'
             , "state": '{{ data.state }}'
         });
         // 表单取值
@@ -177,7 +209,33 @@
                 parent.location.reload()
             }
         });
-    })
+        // 普通事件
+  util.on('lay-on', {
+    // 获取验证码
+    "get-vercode": function(othis){
+        layer.msg('验证码已发送，请注意查收！')
+    var button = document.getElementById('verifyBtn');
+    var originalText = button.textContent; // 保存按钮原始文本
+    button.disabled = true; // 禁用按钮
+
+    // 倒计时逻辑
+    for (var i = 60; i >= 1; i--) {
+        (function(count) {
+            setTimeout(function() {
+                button.textContent = count + ' 秒后重新发送';
+                if (count === 1) {
+                    button.textContent = originalText; // 恢复按钮文本
+                    button.disabled = false; // 恢复按钮可用状态
+                }
+            }, 1000 * (61 - count)); // 每一秒递减
+        })(i);
+    }
+    }
+  });
+
+
+
+    });
 </script>
 </body>
 </html>
