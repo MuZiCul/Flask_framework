@@ -172,6 +172,9 @@
                     if (200 === data.code || '200' === data.code) {
                         layer.msg(data.msg)
                     }
+                    else {
+                        layer.msg(data.msg)
+                    }
                 }
             })
             return false; // 阻止默认 form 跳转
@@ -183,6 +186,9 @@
             $.ajax({
                 url: '/change_pwd_data', method: 'post', data: field, success: function (data) {
                     if (200 === data.code || '200' === data.code) {
+                        layer.msg(data.msg)
+                    }
+                    else{
                         layer.msg(data.msg)
                     }
                 }
@@ -213,8 +219,17 @@
   util.on('lay-on', {
     // 获取验证码
     "get-vercode": function(othis){
-        layer.msg('验证码已发送，请注意查收！')
-    var button = document.getElementById('verifyBtn');
+                    $.ajax({
+                url: '/send_vercode', method: 'post', success: function (data) {
+                    if (200 === data.code || '200' === data.code) {
+                        layer.msg('验证码已发送，请注意查收！')
+                    }
+                    else{
+                        layer.msg(data.msg+'，验证码发送失败，请稍后再试！')
+                    }
+                }
+            })
+            var button = document.getElementById('verifyBtn');
     var originalText = button.textContent; // 保存按钮原始文本
     button.disabled = true; // 禁用按钮
 
@@ -230,6 +245,8 @@
             }, 1000 * (61 - count)); // 每一秒递减
         })(i);
     }
+
+
     }
   });
 

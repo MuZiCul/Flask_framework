@@ -1,7 +1,9 @@
 import datetime
+import os
 import random
 import re
 import string
+import uuid
 
 from flask import Blueprint, render_template, redirect, g, url_for, request, flash, session, jsonify, current_app
 from flask_mail import Message
@@ -249,3 +251,130 @@ def is_valid_email(email):
         return True
     else:
         return False
+
+
+@bp.route('/change_profile_data', methods=['GET', 'POST'])
+def change_profile_data():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        if not username:
+            return jsonify({'code': 400, 'msg': '用户名不能为空'})
+        if len(username) > 20:
+            return jsonify({'code': 400, 'msg': '用户名不能超过20个字符'})
+        if UserModel.query.filter_by(username=username).first():
+            return jsonify({'code': 400, 'msg': '用户名已存在'})
+        user = UserModel.query.filter_by(id=g.user.id).first()
+        user.username = username
+        db.session.commit()
+        email = request.form.get('email')
+        if email:
+            if not is_valid_email(email):
+                return jsonify({'code': 400, 'msg': '邮箱格式不正确'})
+            if UserModel.query.filter_by(email=email).first():
+                return jsonify({'code': 400, 'msg': '邮箱已存在'})
+            user.email = email
+            db.session.commit()
+        else:
+            return jsonify({'code': 400, 'msg': '邮箱不能为空'})
+
+        return jsonify({'code': 200, 'msg': '修改成功'})
+    return jsonify({'code': 400, 'msg': '请求方式错误'})
+
+
+@bp.route('/change_pwd_data', methods=['GET', 'POST'])
+def change_pwd_data():
+    from datetime import datetime
+    if request.method == 'POST':
+        old_pwd = request.form.get('old_pwd')
+        captcha = request.form.get('vercode')
+        new_pwd = request.form.get('new_pwd')
+
+        if 'email' not in session or not captcha:
+            return jsonify({'code': 400, 'msg': '验证码不能为空'})
+        captcha_model = EmailCaptchaModel.query.filter_by(email=session['email']).first()
+        AescryptOb = Aescrypt()
+        if not captcha_model:
+            return jsonify({'code': 400, 'msg': '请重新获取验证码'})
+        else:
+            time_1 = captcha_model.create_time
+            time_2 = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            time_1_struct = datetime.strptime(str(time_1), "%Y-%m-%d %H:%M:%S")
+            time_2_struct = datetime.strptime(str(time_2), "%Y-%m-%d %H:%M:%S")
+            total_seconds = (time_2_struct - time_1_struct).total_seconds()
+            captcha_model.type = 0
+            db.session.commit()
+            data = AescryptOb.encryption(captcha)
+            if total_seconds > 60:
+                return jsonify({'code': 400, 'msg': '验证码已过期'})
+            elif not check_password_hash(captcha_model.captcha, data):
+                return jsonify({'code': 400, 'msg': '验证码不正确'})
+        if not old_pwd or not new_pwd:
+            return jsonify({'code': 400, 'msg': '密码不能为空'})
+        if len(new_pwd) < 6 or len(new_pwd) > 20:
+            return jsonify({'code': 400, 'msg': '密码长度必须在6-20之间'})
+        if not check_password_hash(g.user.password, old_pwd):
+            return jsonify({'code': 400, 'msg': '旧密码错误'})
+        user = UserModel.query.filter_by(id=g.user.id).first()
+        user.password = generate_password_hash(new_pwd)
+        db.session.commit()
+        return jsonify({'code': 200, 'msg': '修改成功'})
+    return jsonify({'code': 400, 'msg': '请求方式错误'})
+
+
+@bp.route('/send_vercode', methods=['GET', 'POST'])
+def send_vercode():
+    if request.method == 'POST':
+        email = g.user.email
+        if not is_valid_email(email):
+            return jsonify({'code': 400, 'msg': '邮箱格式不正确'})
+        session['email'] = email
+        captcha = ''.join(random.sample(string.digits, 6))
+        message = Message(subject='【开发者登录】验证码',
+                          recipients=[email],
+                          body=f'【开发者管理】您的本次验证码是：{captcha}，请勿告知任何人，本次验证码将在几秒后失效！')
+        mail.send(message)
+        captcha_model = EmailCaptchaModel.query.filter_by(email=email).first()
+        AescryptOb = Aescrypt()
+        captcha = generate_password_hash(AescryptOb.encryption(captcha))
+        if captcha_model:
+            captcha_model.captcha = captcha
+            captcha_model.type = 1
+            captcha_model.create_time = datetime.datetime.now()
+            db.session.commit()
+        else:
+            captcha_model = EmailCaptchaModel(email=email, captcha=captcha, type=1)
+            db.session.add(captcha_model)
+            db.session.commit()
+        return jsonify({'code': 200, 'msg': '验证码发送成功'})
+    return jsonify({'code': 400, 'msg': '请求方式错误'})
+
+
+def suffix(file):
+    return file.filename.split('.')[-1]
+
+
+@bp.route('/upload_icon', methods=['GET', 'POST'])
+def upload_icon():
+    if request.method == 'POST':
+        file = request.files.get('file')
+        if not file:
+            return jsonify({'code': 400, 'msg': '请选择文件'})
+        if file.filename.split('.')[-1] not in ['jpg', 'png', 'jpeg']:
+            return jsonify({'code': 400, 'msg': '请上传jpg,png,jpeg格式的图片'})
+        if file.content_length > 1024 * 1024 * 2:
+            return jsonify({'code': 400, 'msg': '文件大小不能超过2M'})
+
+        file_name = str(uuid.uuid4()) + '.' + str(suffix(file))
+        file.save(os.path.join(current_app.config['UPLOAD_PATH'], file_name))
+        user = UserModel.query.filter_by(id=g.user.id).first()
+        if user.icon != 'default_icon.png':
+            os.remove(os.path.join(current_app.config['UPLOAD_PATH'], user.icon))
+            user.icon = file_name
+            db.session.commit()
+            return jsonify({'code': 200, 'msg': '上传成功'})
+        user.icon = file_name
+        db.session.commit()
+        return jsonify({'code': 200, 'msg': '上传成功'})
+    return jsonify({'code': 400, 'msg': '请求方式错误'})
+
+
