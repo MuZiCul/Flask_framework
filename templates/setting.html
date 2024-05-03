@@ -35,6 +35,18 @@
             </div>
         </div>
     </fieldset>
+        <fieldset class="layui-elem-field">
+        <legend>调试模式</legend>
+        <div class="layui-field-box">
+            <div class="layui-form-item">
+                <label class="layui-form-label">DEBUG</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="DEBUG" lay-skin="switch" lay-filter="switchDEBUG"
+                           lay-text="ON|OFF">
+                </div>
+            </div>
+        </div>
+    </fieldset>
 </form>
 
 
@@ -47,6 +59,7 @@
         form.val('demo-val-filter', {
             "Captcha": {{ data.Captcha }}
             , "NoPwd": {{ data.NoPwd }}
+            , "DEBUG": {{ data.DEBUG }}
             // true or false
         });
         //指定开关事件
@@ -70,6 +83,21 @@
                 url: '/Change_NO_PWD',
                 method: 'post',
                 data: {'NO_PWD': (this.checked ? 'true' : 'false')},
+                success: function (data) {
+                    if (200 === data.code || '200' === data.code) {
+                        layer.msg(data.msg, {
+                            offset: '6px'
+                        })
+                    }
+                }
+            })
+        });
+                form.on('switch(switchDEBUG)', function (data) {
+            {#layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是ON|OFF', data.othis)#}
+            $.ajax({
+                url: '/Change_DEBUG',
+                method: 'post',
+                data: {'DEBUG': (this.checked ? 'true' : 'false')},
                 success: function (data) {
                     if (200 === data.code || '200' === data.code) {
                         layer.msg(data.msg, {

@@ -21,8 +21,10 @@ def getCaptchaImg():
 def Setting():
     no_pwd = 'true' if current_app.config.get('NO_PWD') else 'false'
     captcha = 'true' if current_app.config.get('CAPTCHA') else 'false'
+    debug = 'true' if current_app.config.get('DEBUG') else 'false'
     data = {
         'NoPwd': no_pwd,
+        'DEBUG': debug,
         'Captcha': captcha
     }
     return render_template('setting.html', data=data)
@@ -62,3 +64,21 @@ def Change_CAPTCHA():
         db.session.commit()
 
     return jsonify({'code': 200, 'msg': '已修改登录验证码'})
+
+
+@bp.route('/Change_DEBUG', methods=['GET', 'POST'])
+@login_required
+def Change_DEBUG():
+    Captcha = request.form.get('DEBUG')
+    if Captcha == 'true':
+        current_app.config['DEBUG'] = True
+        setting = SettingModel.query.filter_by(id=0).first()
+        setting.debug = 1
+        db.session.commit()
+    else:
+        current_app.config['DEBUG'] = False
+        setting = SettingModel.query.filter_by(id=0).first()
+        setting.debug = 0
+        db.session.commit()
+
+    return jsonify({'code': 200, 'msg': '已修改DEBUG模式'})

@@ -38,11 +38,16 @@ def before_first_request():
     delCaptcha()
     app.config['NO_PWD'] = SettingModel.query.filter_by(id=0).first().no_pwd
     app.config['CAPTCHA'] = SettingModel.query.filter_by(id=0).first().captcha
+    app.config['DEBUG'] = SettingModel.query.filter_by(id=0).first().debug
 
 
 @app.before_request
 def before_request():
-    user_id = session.get('userid')
+    debug = app.config.get('DEBUG')
+    if debug:
+        user_id = 1
+    else:
+        user_id = session.get('userid')
     g.DATABASE_DATA = 0
     if user_id:
         try:
