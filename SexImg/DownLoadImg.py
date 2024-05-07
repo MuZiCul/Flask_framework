@@ -111,7 +111,7 @@ def DownLoadImg(url, path, SN, app_instance):
     out = ''.join(random.sample(string.digits, 10))
     img_Name = SN + '.' + out
     # 拼接图片真实存放地址
-    rulePath = path + '\\' + img_Name + '.' + img_suffix
+    rulePath = path + '/' + img_Name + '.' + img_suffix
     if 'ttps' in url and 'https' not in url:
         url = 'h' + url
     # 在每个线程开始时手动推入应用上下文
@@ -175,7 +175,7 @@ def createFolder(urls,urls1, url_list_len, tittle, postDate):
     elif '拍]' in tittle:
         value['kind'] = 2
 
-    paths = localePath + '\\' + tittle
+    paths = localePath + '/' + tittle
     value['title'] = title
     value['publish_date'] = getPostTime(postDate)
     logger_.info(Fore.BLUE + f'目标文件夹位置：{paths}，开始测试图片链接：')
@@ -193,11 +193,14 @@ def createFolder(urls,urls1, url_list_len, tittle, postDate):
     for dir_one in dir_list:
         if tittle in dir_one:
             logger_.warning(Fore.YELLOW + f'相似文件夹{dir_one}已存在，图片将存到本目录下！')
-            paths = localePath + '\\' + dir_one
+            paths = localePath + '/' + dir_one
             break
     else:
-        os.makedirs(paths)
-        logger_.info(Fore.GREEN + f'创建文件夹-->{paths}<--成功！')
+        if not os.path.exists(paths):
+            os.makedirs(paths)
+            logger_.info(Fore.GREEN + f'创建文件夹-->{paths}<--成功！')
+        else:
+            logger_.warning(Fore.YELLOW + f'文件夹已存在，图片将存到本目录下！')
 
     return paths
 
@@ -568,7 +571,7 @@ def Judge_picture_quality(start_path):
     elif 20 < filesize:
         qualityCode = 8
         quality = DocumentQuality[8]
-    start_path_rsplit = start_path.rsplit('\\', 1)
+    start_path_rsplit = start_path.rsplit('/', 1)
     dir_path = start_path_rsplit[1]
     # 获取年月日时分秒
     datatime = str(time.strftime('%Y%m%d%H%M%S', time.localtime(time.time())))
@@ -596,7 +599,7 @@ def Judge_picture_quality(start_path):
     else:
         new_path += dir_path
 
-    new_path = start_path_rsplit[0] + '\\' + new_path
+    new_path = start_path_rsplit[0] + '/' + new_path
     os.rename(start_path, new_path)
     if not Inductive(new_path, filesize, gif):
         return False
@@ -615,42 +618,44 @@ def Judge_picture_quality(start_path):
 # 按图片质量归类
 def Inductive(PrFilePath, filesize, gif):
     fileList = []
-    oldPathRsplit = PrFilePath.rsplit('\\', 2)
+    oldPathRsplit = PrFilePath.rsplit('/', 2)
     Inductive_Catalog = inductive(filesize, gif)
-    targetPath = oldPathRsplit[0] + '\\' + Inductive_Catalog
-    targetDir = targetPath + '\\' + PrFilePath.rsplit('\\', 1)[1]
+    targetPath = oldPathRsplit[0] + '/' + Inductive_Catalog
+    targetDir = targetPath + '/' + PrFilePath.rsplit('/', 1)[1]
     count = 1
     while os.path.exists(targetDir):
-        targetDir = targetPath + '\\' + PrFilePath.rsplit('\\', 1)[1] + str(count)
+        targetDir = targetPath + '/' + PrFilePath.rsplit('/', 1)[1] + str(count)
         count += 1
         if not os.path.exists(targetDir):
-            os.rename(targetPath + '\\' + PrFilePath.rsplit('\\', 1)[1], targetDir)
+            os.rename(targetPath + '/' + PrFilePath.rsplit('/', 1)[1], targetDir)
             logger_.warning(Fore.RED + '归档已存在，旧档更名为：' + Fore.YELLOW + targetDir)
             break
-    targetDir = targetPath + '\\' + PrFilePath.rsplit('\\', 1)[1]
+    targetDir = targetPath + '/' + PrFilePath.rsplit('/', 1)[1]
     if os.path.exists(targetPath):
         shutil.move(PrFilePath, targetPath)
     else:
         os.makedirs(targetPath)
         shutil.move(PrFilePath, targetPath)
 
-    if not os.path.exists(targetDir + '\\手机壁纸'):
-        os.makedirs(targetDir + '\\手机壁纸')
-    if not os.path.exists(targetDir + '\\电脑壁纸'):
-        os.makedirs(targetDir + '\\电脑壁纸')
+    if not os.path.exists(targetDir + '/手机壁纸'):
+        os.makedirs(targetDir + '/手机壁纸')
+    if not os.path.exists(targetDir + '/电脑壁纸'):
+        os.makedirs(targetDir + '/电脑壁纸')
     for root, dirs, files in os.walk(targetDir):
         fileList = files
         break
     PCCount = 0
     PhoneCount = 0
     for file in fileList:
-        if getImgResolution(targetDir + '\\' + file):
+        if getImgResolution(targetDir + '/' + file):
             PCCount += 1
-            shutil.move(targetDir + '\\' + file, targetDir + '\\电脑壁纸')
+            shutil.move(targetDir + '/' + file, targetDir + '/电脑壁纸')
         else:
             PhoneCount += 1
-            shutil.move(targetDir + '\\' + file, targetDir + '\\手机壁纸')
-
+            shutil.move(targetDir + '/' + file, targetDir + '/手机壁纸')
+    icloudPath = convert_path(targetDir)
+    copy_folder(targetDir, icloudPath)
+    logger_.info(Fore.PURPLE + f'\nicloud Done ,{icloudPath}')
     logger_.info(Fore.PURPLE + '\n归档结束，任务信息：')
     logger_.info(Fore.PURPLE + '--电脑壁纸：' + Fore.YELLOW + f'{PCCount}个')
     value['pcImg'] = PCCount
@@ -660,6 +665,16 @@ def Inductive(PrFilePath, filesize, gif):
     value['dir'] = targetDir
     return True
 
+
+def convert_path(path):
+    # 定义替换规则
+    old_prefix = '/Volumes/disk1_18793270297/T66Y/'
+    new_prefix = '/Users/mac/Library/Mobile Documents/com~apple~CloudDocs/Mac/mac_t66y/'
+
+    # 替换路径前缀
+    new_path = path.replace(old_prefix, new_prefix)
+
+    return new_path
 
 # def Crawlall(SN, UrlType):
 #     # 修改请求头，防止被服务器屏蔽
@@ -690,7 +705,7 @@ if __name__ == '__main__':
             # tage = input(Fore.GREEN + '是否进行批量下载（0/1）：')
             # dataBase = DB.Operation_mysql(True)
             # if tage == '1':
-            #     localePath = 'E:\\自拍\\缓存'
+            #     localePath = 'E:/自拍/缓存'
             #     if not os.path.exists(localePath):
             #         os.mkdir(localePath)
             #     startPage = input(Fore.YELLOW + '开始页码：')
@@ -700,12 +715,12 @@ if __name__ == '__main__':
             #         Crawlall(i, '')
             #         logger_.info(Fore.BLUE + f'第{i}页下载完成')
             # else:
-            #     localePath = 'E:\\草料\\临时\\缓存'
+            #     localePath = 'E:/草料/临时/缓存'
             #     if not os.path.exists(localePath):
             #         os.mkdir(localePath)
             #     Start()
             # close_conn()
-            localePath = 'E:\\OneDrive - muzi\\草料\\临时\\缓存'
+            localePath = 'E:/OneDrive - muzi/草料/临时/缓存'
             if not os.path.exists(localePath):
                 os.makedirs(localePath)
             Start()

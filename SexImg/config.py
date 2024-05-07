@@ -1,13 +1,14 @@
 # 本地代理服务器地址
 proxies = {'http': 'http://127.0.0.1:11223', 'https': 'http://127.0.0.1:11223'}
 # 草榴新时代的我们全站存放地址
-localePath = 'G:\\测试\\全站\\缓存'
+root = '/Volumes/disk1_18793270297/T66Y'
+localePath = root + '/全站/缓存'
 # 草榴自拍图存放地址
-localePathSelf = 'G:\\测试\\自拍\\缓存'
+localePathSelf = root + '/自拍/缓存'
 # 草榴失败重下存放地址
-localeFailPathSelf = 'G:\\测试\\失败重下'
+localeFailPathSelf = root + '/失败重下'
 # wall图存放地址
-wallImgPath = 'G:\\测试\\img'
+wallImgPath = root + '/img'
 # 请求超时时间
 timeout = 200
 # 图片质量

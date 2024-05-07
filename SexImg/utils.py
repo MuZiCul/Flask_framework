@@ -1,4 +1,6 @@
 import json
+import os
+import shutil
 
 from SexImg import config
 import requests
@@ -260,3 +262,28 @@ def send_to_wecom(msg):
         return response
     else:
         return 0
+
+
+def copy_folder(src, dst):
+    # 确保目标目录不存在，以避免覆盖现有文件夹
+    if os.path.exists(dst):
+        logger_util.error(f"目标路径 {dst} 已存在，请选择其他位置或删除现有文件夹。")
+        return
+    try:
+        # 使用shutil.copytree复制源文件夹到目标位置
+        shutil.copytree(src, dst)
+        logger_util.info(f"文件夹从 {src} 成功复制到 {dst}")
+    except FileNotFoundError:
+        logger_util.error(f"源文件夹 {src} 未找到。")
+    except Exception as e:
+        logger_util.error(f"复制过程中发生错误: {e}")
+
+
+# 示例用法
+
+# source_folder = 'F:\临时\新建文件夹\[标清质量][AVG：2.1MB][2022-06-29][寫真]粉色水手服[24P]'  # 替换为您的源文件夹路径
+#
+# destination_folder = 'F:\Mac Software\新建文件夹\[标清质量][AVG：2.1MB][2022-06-29][寫真]粉色水手服[24P]'  # 替换为您想复制到的新位置路径
+#
+# copy_folder(source_folder, destination_folder)
+

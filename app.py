@@ -35,12 +35,13 @@ app.config['UPLOAD_PATH'] = os.path.join(os.path.dirname(__file__), 'file')
 scheduler.start()
 
 
-@app.before_first_request
-def before_first_request():
-    delCaptcha()
+# @app.before_first_request
+# def before_first_request():
+    # delCaptcha()
     # app.config['NO_PWD'] = SettingModel.query.filter_by(id=0).first().no_pwd
     # app.config['CAPTCHA'] = SettingModel.query.filter_by(id=0).first().captcha
     # app.config['DEBUG'] = SettingModel.query.filter_by(id=0).first().debug
+
 
 
 @app.before_request
