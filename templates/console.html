@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Log Viewer</title>
+    <style>
+        #log-container {
+            height: 300px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+    <div id="log-container"></div>
+
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('logs', function(log) {
+            const logEntry = document.createElement('p');
+            logEntry.textContent = log;
+            document.getElementById('log-container').appendChild(logEntry);
+            // 自动滚动到最底部
+            document.getElementById('log-container').scrollTo(0, document.getElementById('log-container').scrollHeight);
+        });
+    </script>
+</body>
+</html>

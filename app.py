@@ -1,9 +1,11 @@
 import io
 import os
 from PIL import Image
-from flask import Flask, session, g, render_template, send_file
+from flask import Flask, session, g, render_template, send_file, jsonify
 from flask_migrate import Migrate
 from flask_apscheduler import APScheduler
+
+from SexImg.autoT66y import T66y
 from config import config, private_config
 from blueprints import user_bp, general_bp
 from config.decorators import login_required
@@ -36,9 +38,9 @@ scheduler.start()
 @app.before_first_request
 def before_first_request():
     delCaptcha()
-    app.config['NO_PWD'] = SettingModel.query.filter_by(id=0).first().no_pwd
-    app.config['CAPTCHA'] = SettingModel.query.filter_by(id=0).first().captcha
-    app.config['DEBUG'] = SettingModel.query.filter_by(id=0).first().debug
+    # app.config['NO_PWD'] = SettingModel.query.filter_by(id=0).first().no_pwd
+    # app.config['CAPTCHA'] = SettingModel.query.filter_by(id=0).first().captcha
+    # app.config['DEBUG'] = SettingModel.query.filter_by(id=0).first().debug
 
 
 @app.before_request
@@ -85,12 +87,33 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/test')
+def test():
+    with app.app_context():
+        T66y()
+    return jsonify({'code': 200})
+
+
+@app.route('/console')
+def console():
+    return render_template('console.html')
+
+
 # 定时清理验证码图片
 @scheduler.task('interval', id='delCaptcha', minutes=10)
 def check_net():
     try:
         with scheduler.app.app_context():
             delCaptcha()
+    finally:
+        pass
+
+
+@scheduler.task('interval', id='delCaptcha', minutes=180)
+def T66y_task():
+    try:
+        with scheduler.app.app_context():
+            T66y()
     finally:
         pass
 
