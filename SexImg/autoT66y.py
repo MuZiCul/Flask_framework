@@ -221,13 +221,14 @@ def reDownload():
 
 
 def Hard_disk_monitoring():
-    import shutil
-    gb = 1024 ** 3  # GB == gigabyte
-    total_b, used_b, free_b = shutil.disk_usage('E:')  # 查看磁盘的使用情况
-    print('总的磁盘空间: {:6.2f} GB '.format(total_b / gb))
-    print('已经使用的 : {:6.2f} GB '.format(used_b / gb))
-    print('未使用的 : {:6.2f} GB '.format(free_b / gb))
-    return total_b, used_b, free_b
+    # import shutil
+    # gb = 1024 ** 3  # GB == gigabyte
+    # total_b, used_b, free_b = shutil.disk_usage('E:')  # 查看磁盘的使用情况
+    # print('总的磁盘空间: {:6.2f} GB '.format(total_b / gb))
+    # print('已经使用的 : {:6.2f} GB '.format(used_b / gb))
+    # print('未使用的 : {:6.2f} GB '.format(free_b / gb))
+    # return total_b, used_b, free_b
+    return 0, 0, 0
 
 
 def update_database():
@@ -265,6 +266,7 @@ def T66y():
     start()
     update_database()
     logger.info(Fore.YELLOW + '开始休眠！')
+    logger.info(Fore.RED + f'现在时间：{time.strftime("%H:%M:%S", time.localtime())}')
 
 
 if __name__ == '__main__':

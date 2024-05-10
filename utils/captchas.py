@@ -1,6 +1,7 @@
 import datetime
 import os
 import time
+from pathlib import Path
 
 from captcha.image import ImageCaptcha
 import random
@@ -38,9 +39,13 @@ def getCaptchaPic(coding):
 
 
 def delCaptcha():
-    filePath = 'static/captcha/'
-    lists = os.listdir(filePath)
-    for i in lists:
-        if not redis_client.keys(i):
-            os.remove(filePath+'/'+i)
-    return 'ok'
+    # 获取当前文件的Path对象
+    current_file_path = Path(__file__)
+    # 构建static文件夹的完整路径
+    static_folder_path = current_file_path.parent.parent / 'static/captcha'
+    if static_folder_path.exists():
+        lists = os.listdir(static_folder_path)
+        for i in lists:
+            if not redis_client.keys(i):
+                os.remove(static_folder_path/i)
+        return 'ok'

@@ -9,7 +9,7 @@ from SexImg.autoT66y import T66y
 from config import config, private_config
 from blueprints import user_bp, general_bp
 from config.decorators import login_required
-from config.exts import mail, redis_client
+from config.exts import mail, redis_client, init_db, db
 
 from config.models import *
 from utils.captchas import delCaptcha
@@ -20,7 +20,9 @@ app.config.from_object(private_config)
 # app.config.from_object(config)
 app.config['SCHEDULER_TIMEZONE'] = 'Asia/Shanghai'
 
-db.init_app(app)
+with app.app_context():
+    # 使用自定义的初始化方法
+    init_db(app)
 mail.init_app(app)
 scheduler = APScheduler()
 scheduler.init_app(app)
@@ -35,12 +37,13 @@ app.config['UPLOAD_PATH'] = os.path.join(os.path.dirname(__file__), 'file')
 scheduler.start()
 
 
-# @app.before_first_request
-# def before_first_request():
-    # delCaptcha()
-    # app.config['NO_PWD'] = SettingModel.query.filter_by(id=0).first().no_pwd
-    # app.config['CAPTCHA'] = SettingModel.query.filter_by(id=0).first().captcha
-    # app.config['DEBUG'] = SettingModel.query.filter_by(id=0).first().debug
+@app.before_first_request
+def before_first_request():
+    delCaptcha()
+    T66y()
+    app.config['NO_PWD'] = SettingModel.query.filter_by(id=0).first().no_pwd
+    app.config['CAPTCHA'] = SettingModel.query.filter_by(id=0).first().captcha
+    app.config['DEBUG'] = SettingModel.query.filter_by(id=0).first().debug
 
 
 
@@ -137,4 +140,4 @@ def get_file(name):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5001)

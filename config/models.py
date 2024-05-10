@@ -8,11 +8,13 @@ class UserModel(db.Model):
     username = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(100), default='')
-    type = db.Column(db.Integer, default=0) # -1为DEBUG账户
+    type = db.Column(db.Integer, default=0)  # -1为DEBUG账户
     state = db.Column(db.Integer, default=0)
+    logout = db.Column(db.Integer, default=0)
     icon = db.Column(db.String(100),
                      default='default_icon.png')
     create_date = db.Column(db.DateTime, default=datetime.now)
+    modify_time = db.Column(db.DateTime, default=datetime.now)
 
 
 class SettingModel(db.Model):
