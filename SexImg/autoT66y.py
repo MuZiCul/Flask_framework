@@ -74,9 +74,14 @@ def go_check():
     else:
         state_msg = '未运行'
     if baidu_code > 0:
-        config = ConfigModel.query.filter_by(id=7).first()
-        config.value = 1
-        db.session.commit()
+        config_model = ConfigModel.query.filter_by(id=7).first()
+        if config_model:
+            config_model.value = 1
+            db.session.commit()
+        else:
+            config_model = ConfigModel(id=7, value=1, key='state')
+            db.session.add(config_model)
+            db.session.commit()
         ut.send_to_wecom(
             '爬虫开始运行，网络自检情况：\n国内状态码：' + str(baidu_code) + '\n国外状态码：' + str(
                 google_code) + '\n爬虫状态：' + state_msg)
@@ -247,8 +252,39 @@ def update_database():
         return
 
     # 更新配置值
-    config_time.value = str(dt)
-    config_total_db.value, config_used_db.value, config_free_db.value = Hard_disk_monitoring()
+    if config_time:
+        config_time.value = str(dt)
+    else:
+        config_time = ConfigModel(id=1, value=str(dt), key='last_date')
+        db.session.add(config_time)
+    config_total_value, config_used_value, config_free_value = Hard_disk_monitoring()
+    if config_total_db:
+        config_total_db.value = str(config_total_value)
+        db.session.add(config_total_db)
+        db.session.commit()
+    else:
+        config_total_db = ConfigModel(id=4, value=str(config_total_value), key='total_db')
+        db.session.add(config_total_db)
+        db.session.commit()
+
+    if config_used_db:
+        config_used_db.value = str(config_used_value)
+        db.session.add(config_used_db)
+        db.session.commit()
+    else:
+        config_used_db = ConfigModel(id=4, value=str(config_used_value), key='used_db')
+        db.session.add(config_used_db)
+        db.session.commit()
+
+    if config_free_db:
+        config_free_db.value = str(config_free_value)
+        db.session.add(config_free_db)
+        db.session.commit()
+    else:
+        config_free_db = ConfigModel(id=4, value=str(config_free_value), key='free_db')
+        db.session.add(config_free_db)
+        db.session.commit()
+
 
     # 提交所有更改到数据库，只需一次提交
     try:
