@@ -48,3 +48,7 @@ services:
     volumes:
 
       - redis_data:/data  # 持久化Redis数据
+
+volumes:
+
+  redis-data: # 定义redis数据卷
