@@ -78,7 +78,8 @@ def go_check():
         config.value = 1
         db.session.commit()
         ut.send_to_wecom(
-            '爬虫开始运行，网络自检情况：\n国内状态码：' + str(baidu_code) + '\n国外状态码：' + str(google_code) + '\n爬虫状态：' + state_msg)
+            '爬虫开始运行，网络自检情况：\n国内状态码：' + str(baidu_code) + '\n国外状态码：' + str(
+                google_code) + '\n爬虫状态：' + state_msg)
     if baidu_code + google_code < 2:
         sys.exit(0)
 

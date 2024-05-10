@@ -1,7 +1,7 @@
 # 本地代理服务器地址
 proxies = {'http': 'http://127.0.0.1:11223', 'https': 'http://127.0.0.1:11223'}
 # 草榴新时代的我们全站存放地址
-root = '/Volumes/disk1_18793270297/T66Y'
+root = '/app/file/T66Y/icloud/'
 localePath = root + '/全站/缓存'
 # 草榴自拍图存放地址
 localePathSelf = root + '/自拍/缓存'
@@ -49,7 +49,7 @@ printColour = 1
 log = 1
 
 PrintColourList = ['\033[95m', '\033[94m', '\033[92m', '\033[93m', '\033[91m', '\033[95m', '\033[94m', '\033[92m',
-              '\033[93m', '\033[91m', '\033[0m', '\033[1m', '\033[4m', '\n', '\r']
+                   '\033[93m', '\033[91m', '\033[0m', '\033[1m', '\033[4m', '\n', '\r']
 
 jumpList = ['xsspic', 'imgxx.xyz']
 
@@ -118,7 +118,7 @@ class Fore:
         underline = ''
 
 
-#企业微信配置
+# 企业微信配置
 WECOM_CID = 'wwec2f4545241fa36d'  # 企业id
 WECOM_AID = '1000004'  # 应用id
 WECOM_SECRET = 'qCRWc1_PhhhYSjZr9oPENxBHPPQFYgA60Hzs-PxC_z8'  # 应用secret

@@ -93,6 +93,8 @@ logger_ = logger()
 
 
 def DownLoadImg(url, path, SN, app_instance):
+    if path and not os.path.exists(path):
+        os.makedirs(path)
     # 修改请求头，防止被服务器屏蔽
     global headers1
     global FailImgUrlList
@@ -262,10 +264,9 @@ def DownLoadStart(URL, downloadPath):
     value['SuccessImgUrlList'] = []
     value['FailImgUrlList'] = []
     global localePath, FailImgUrlList, headers
-    if not downloadPath == '' and not os.path.exists(downloadPath):
+    if downloadPath and not os.path.exists(downloadPath):
         os.makedirs(downloadPath)
-    if not downloadPath == '':
-        localePath = downloadPath
+    localePath = downloadPath
     # 修改请求头，防止被服务器屏蔽
     # 获取下载列表
     response = getResponse(URL, headers, 0)
@@ -668,8 +669,8 @@ def Inductive(PrFilePath, filesize, gif):
 
 def convert_path(path):
     # 定义替换规则
-    old_prefix = '/Volumes/disk1_18793270297/T66Y/'
-    new_prefix = '/Users/mac/Library/Mobile Documents/com~apple~CloudDocs/Mac/mac_t66y/'
+    old_prefix = '/app/file/T66Y/icloud/'
+    new_prefix = '/app/file/T66Y/nas/'
 
     # 替换路径前缀
     new_path = path.replace(old_prefix, new_prefix)

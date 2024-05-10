@@ -4,6 +4,7 @@ from PIL import Image
 from flask import Flask, session, g, render_template, send_file, jsonify
 from flask_migrate import Migrate
 from flask_apscheduler import APScheduler
+from werkzeug.security import generate_password_hash
 
 from SexImg.autoT66y import T66y
 from config import config, private_config
@@ -14,6 +15,7 @@ from config.exts import mail, redis_client, init_db, db
 from config.models import *
 from utils.captchas import delCaptcha
 from utils.useronline import PollingUserOnline
+from sqlalchemy import inspect
 
 app = Flask(__name__)
 app.config.from_object(private_config)
@@ -39,12 +41,26 @@ scheduler.start()
 
 @app.before_first_request
 def before_first_request():
+    init_create_db()
     delCaptcha()
     T66y()
     app.config['NO_PWD'] = SettingModel.query.filter_by(id=0).first().no_pwd
     app.config['CAPTCHA'] = SettingModel.query.filter_by(id=0).first().captcha
     app.config['DEBUG'] = SettingModel.query.filter_by(id=0).first().debug
 
+
+def init_create_db():
+    with app.app_context():
+        inspecter = inspect(db.engine)
+        if not inspecter.has_table('user'):
+            from config.models import SettingModel, UserModel, EmailCaptchaModel, SpuModel, FpuModel, LogModel, \
+                ConfigModel, JpuModel, FiuModel, SiuModel, AgainpageModel, ReFiuModel
+            db.create_all()
+            setting = SettingModel(id=0, no_pwd=1, captcha=1, debug=1)
+            db.session.add(setting)
+            user = UserModel(email='obama', username='obama', password=generate_password_hash('obama'))
+            db.session.add(user)
+            db.session.commit()
 
 
 @app.before_request
@@ -140,4 +156,4 @@ def get_file(name):
 
 
 if __name__ == '__main__':
-    app.run(port=5001)
+    app.run(host='0.0.0.0', port=5000)

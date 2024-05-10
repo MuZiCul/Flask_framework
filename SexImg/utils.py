@@ -2,8 +2,9 @@ import json
 import os
 import shutil
 
-from SexImg import config
 import requests
+
+from SexImg import config
 import re
 # 安装时安装pillow
 from PIL import Image
@@ -19,7 +20,6 @@ User_Agents = config.User_Agents
 imgSuffix = config.imgSuffix
 returnType = config.ReturnType
 log = config.log
-
 
 logger_util = logger()
 
@@ -157,7 +157,7 @@ class NetConnect:
         return baidu_code, google_code
 
 
-def checkNet(urls,urls1, url_list_len, headers1):
+def checkNet(urls, urls1, url_list_len, headers1):
     # net = NetConnect()
     # if not net.check_connect(0):
     #     return False
@@ -278,7 +278,6 @@ def copy_folder(src, dst):
     except Exception as e:
         logger_util.error(f"复制过程中发生错误: {e}")
 
-
 # 示例用法
 
 # source_folder = 'F:\临时\新建文件夹\[标清质量][AVG：2.1MB][2022-06-29][寫真]粉色水手服[24P]'  # 替换为您的源文件夹路径
@@ -286,4 +285,3 @@ def copy_folder(src, dst):
 # destination_folder = 'F:\Mac Software\新建文件夹\[标清质量][AVG：2.1MB][2022-06-29][寫真]粉色水手服[24P]'  # 替换为您想复制到的新位置路径
 #
 # copy_folder(source_folder, destination_folder)
-

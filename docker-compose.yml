@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  mysql_server:
+    image: mysql:8.0
+    restart: always
+    container_name: mysql_server
+    environment:
+      MYSQL_ROOT_PASSWORD: .pass.123word
+      MYSQL_DATABASE: my_url_db
+    ports:
+      - "3366:3306"  # 映射MySQL的3306端口到宿主机的3066端口，供局域网访问
+    volumes:
+      - /Users/mac/Library/Mobile Documents/com~apple~CloudDocs/Mac/db_data:/app/file/mysql  # 数据持久化
+  myweb_server:
+    build: .
+    command: flask run --host=0.0.0.0
+    ports:
+      - "5600:5000"
+    environment:
+      - MYSQL_HOST=mysql_server
+      - MYSQL_DB=my_url_db
+      - MYSQL_USER=root
+      - MYSQL_PORT=3306
+      - MYSQL_PWD=.pass.123word
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+    depends_on:
+      - mysql_server
+    volumes:
+      - /Users/mac/Library/Mobile Documents/com~apple~CloudDocs/Mac/mac_t66y:/app/file/T66Y/icloud  # 数据持久化
+      - /Volumes/disk1_18793270297/T66Y:/app/file/T66Y/nas
