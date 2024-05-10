@@ -19,7 +19,7 @@ from sqlalchemy import inspect
 
 app = Flask(__name__)
 app.config.from_object(private_config)
-# app.config.from_object(config)
+app.config.from_object(config)
 app.config['SCHEDULER_TIMEZONE'] = 'Asia/Shanghai'
 
 with app.app_context():

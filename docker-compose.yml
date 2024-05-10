@@ -10,10 +10,12 @@ services:
     ports:
       - "3366:3306"  # 映射MySQL的3306端口到宿主机的3066端口，供局域网访问
     volumes:
-      - /Users/mac/Library/Mobile Documents/com~apple~CloudDocs/Mac/db_data:/app/file/mysql  # 数据持久化
-  myweb_server:
+      - /Users/mac/Library/Mobile Documents/com~apple~CloudDocs/Mac/db_data:/var/lib/mysql  # 数据持久化
+
+  web_server:
     build: .
     command: flask run --host=0.0.0.0
+    container_name: web_server
     ports:
       - "5600:5000"
     environment:
@@ -24,8 +26,25 @@ services:
       - MYSQL_PWD=.pass.123word
       - FLASK_APP=app.py
       - FLASK_ENV=development
+      - REDIS_HOST=redis_server  # 添加Redis主机名
+      - REDIS_PORT=6379         # 如果端口不是默认，也可以指定
     depends_on:
       - mysql_server
     volumes:
       - /Users/mac/Library/Mobile Documents/com~apple~CloudDocs/Mac/mac_t66y:/app/file/T66Y/icloud  # 数据持久化
       - /Volumes/disk1_18793270297/T66Y:/app/file/T66Y/nas
+  redis_server:
+
+    image: 'redis:latest'  # 或使用 'redis' 获取最新稳定版
+
+    restart: always
+
+    container_name: redis_server
+
+    ports:
+
+      - '6379:6379'  # 映射Redis的端口
+
+    volumes:
+
+      - redis_data:/data  # 持久化Redis数据
