@@ -272,7 +272,7 @@ def update_database():
         db.session.add(config_used_db)
         db.session.commit()
     else:
-        config_used_db = ConfigModel(id=4, value=str(config_used_value), key='used_db')
+        config_used_db = ConfigModel(id=5, value=str(config_used_value), key='used_db')
         db.session.add(config_used_db)
         db.session.commit()
 
@@ -281,7 +281,7 @@ def update_database():
         db.session.add(config_free_db)
         db.session.commit()
     else:
-        config_free_db = ConfigModel(id=4, value=str(config_free_value), key='free_db')
+        config_free_db = ConfigModel(id=6, value=str(config_free_value), key='free_db')
         db.session.add(config_free_db)
         db.session.commit()
 
@@ -301,7 +301,7 @@ def T66y():
     logger.info(Fore.RED + f'现在时间：{time.strftime("%H:%M:%S", time.localtime())}')
     go_check()
     start()
-    update_database()
+    # update_database()
     logger.info(Fore.YELLOW + '开始休眠！')
     logger.info(Fore.RED + f'现在时间：{time.strftime("%H:%M:%S", time.localtime())}')
 
