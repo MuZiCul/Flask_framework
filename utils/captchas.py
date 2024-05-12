@@ -30,10 +30,13 @@ def getCaptchaPic(coding):
         random_random = ''.join([random.choice(characters) for j in range(6)])
         img = generator.generate_image(random_str)
         session['coding'] = coding
-        file_name = 'static/captcha/' + random_random +'.jpg'
+        current_file_path = Path(__file__)
+        # 构建static文件夹的完整路径
+        static_folder_path = current_file_path.parent.parent / 'static/captcha'
+        file_name = static_folder_path / random_random / '.jpg'
         session['oldSrc'] = file_name
         redis_client.set(random_str.lower(), 'captcha_img_code', 300)
-        redis_client.set(random_random +'.jpg', 'captcha_img', 300)
+        redis_client.set(random_random + '.jpg', 'captcha_img', 300)
         img.save(file_name)
         return file_name, coding
 
